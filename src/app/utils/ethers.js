@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import CrowdfundingFactory from '../../../artifacts/contracts/CrowdfundingFactory.sol/CrowdfundingFactory.json';
 import Crowdfunding from '../../../artifacts/contracts/Crowdfunding.sol/Crowdfunding.json';
 
-const FACTORY_CONTRACT_ADDRESS = '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707';
+const FACTORY_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 export const getProvider = () => {
   if (typeof window !== 'undefined' && window.ethereum) {
