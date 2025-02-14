@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAllCampaigns, getCampaignDetails } from './utils/ethers';
+import CreateCampaignForm from './Components/CreateCamp';
 
 export default function Home() {
   const [campaigns, setCampaigns] = useState([]);
@@ -30,6 +31,12 @@ export default function Home() {
 
       // Get all campaign addresses from factory
       const campaignList = await getAllCampaigns();
+
+      // If no campaigns are found, set campaigns to an empty array and return
+      if (campaignList.length === 0) {
+        setCampaigns([]);
+        return;
+      }
 
       // Fetch details for each campaign
       const campaignDetails = await Promise.all(
@@ -81,7 +88,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Hero Section */}
         <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Decentralized Crowdfunding</h1>
           <p className="text-xl text-gray-600 mb-6">Support innovative projects and ideas through blockchain technology</p>
@@ -100,11 +106,17 @@ export default function Home() {
               {loading ? 'Loading...' : 'Show All Campaigns'}
             </button>
           )}
-
           {error && <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
         </div>
 
-        {/* Campaigns Grid */}
+        {/* Display a message if no campaigns are found */}
+        {campaigns.length === 0 && !loading && (
+          <div className="text-center text-gray-600 py-8">
+            <p>No campaigns created yet.</p>
+          </div>
+        )}
+        <CreateCampaignForm />
+        {/* Display the grid of campaigns if campaigns exist */}
         {campaigns.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {campaigns.map((campaign) => (
