@@ -108,15 +108,12 @@ export default function Home() {
           )}
           {error && <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
         </div>
-
-        {/* Display a message if no campaigns are found */}
         {campaigns.length === 0 && !loading && (
           <div className="text-center text-gray-600 py-8">
             <p>No campaigns created yet.</p>
           </div>
         )}
-        <CreateCampaignForm />
-        {/* Display the grid of campaigns if campaigns exist */}
+        <CreateCampaignForm isWalletConnected={isWalletConnected} />
         {campaigns.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {campaigns.map((campaign) => (
@@ -126,7 +123,11 @@ export default function Home() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <h2 className="text-xl font-semibold text-gray-900">{campaign.name}</h2>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(campaign.state)}`}>{getStateText(campaign.state)}</span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium
+                       ${getStateColor(campaign.state)}`}>
+                      {getStateText(campaign.state)}
+                    </span>
                   </div>
 
                   <p className="text-gray-600 mb-4 line-clamp-3">{campaign.description}</p>
