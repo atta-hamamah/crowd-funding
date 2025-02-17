@@ -6,7 +6,7 @@ import Crowdfunding from '../../../artifacts/contracts/Crowdfunding.sol/Crowdfun
 const FACTORY_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 export const getProvider = () => {
-  if (typeof window !== 'undefined' && window.ethereum) {
+  if (window !== 'undefined' && window.ethereum) {
     return new ethers.BrowserProvider(window.ethereum);
   }
   throw new Error('Please install MetaMask or another web3 wallet');

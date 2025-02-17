@@ -12,7 +12,7 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      if (typeof window.ethereum !== 'undefined') {
+      if (window.ethereum !== 'undefined') {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         setIsWalletConnected(true);
       } else {
