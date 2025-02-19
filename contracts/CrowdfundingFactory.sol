@@ -57,7 +57,9 @@ contract CrowdfundingFactory {
         userCampaigns[msg.sender].push(campaign);
     }
 
-    function getUserCampaigns(address _user) external view returns (Campaign[] memory) {
+    function getUserCampaigns(
+        address _user
+    ) external view returns (Campaign[] memory) {
         return userCampaigns[_user];
     }
 

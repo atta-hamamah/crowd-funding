@@ -29,9 +29,7 @@ export const createCampaign = async (name, description, goal, durationInDays) =>
   try {
     const signer = await getSigner();
     const factory = getFactoryContract(signer);
-
     const tx = await factory.createCampaign(name, description, ethers.parseEther(goal.toString()), durationInDays);
-
     await tx.wait();
     return tx;
   } catch (error) {
