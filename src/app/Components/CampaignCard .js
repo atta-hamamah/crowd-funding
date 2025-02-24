@@ -1,32 +1,33 @@
 import React, { useState } from 'react';
-import { fundCampaign } from '../utils/ethers';
+import { fundCampaign, addTier } from '../utils/ethers';
 
 const CampaignCard = ({ camp }) => {
   const [loading, setLoading] = useState(false);
+  const [tierName, setTierName] = useState('');
+  const [tierVal, setTierVal] = useState('');
   const [error, setError] = useState('');
 
-  // Calculate progress percentage using the current balance
   const currentAmount = Number(camp.currentAmount);
   const goalAmount = Number(camp.goal);
   const progress = (currentAmount / goalAmount) * 100;
   const formattedProgress = Math.min(progress, 100).toFixed(1);
 
-  // Calculate days remaining
   const daysRemaining = Math.max(0, Math.ceil((new Date(camp.deadline) - new Date()) / (1000 * 60 * 60 * 24)));
 
-  // Format wallet address to be more readable
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
+  const addNewTier = (e) => {
+    e.preventDefault();
 
+    addTier(camp.address, tierName, Number(tierVal));
+  };
   const handleFund = async (tierIndex = 0) => {
     try {
       setLoading(true);
       setError('');
-      // If there are no tiers, use the minimum amount (0.01 ETH)
       const amount = camp.tiers.length > 0 ? camp.tiers[tierIndex].amount : '0.01';
       await fundCampaign(camp.address, tierIndex, amount);
-      // You might want to add a callback here to refresh the campaign data
     } catch (err) {
       setError(err.message || 'Failed to fund campaign');
     } finally {
@@ -36,11 +37,11 @@ const CampaignCard = ({ camp }) => {
   const getStateColor = (state) => {
     switch (state) {
       case 0:
-        return 'bg-blue-100 text-blue-800'; // Active
+        return 'bg-blue-100 text-blue-800';
       case 1:
-        return 'bg-green-100 text-green-800'; // Successful
+        return 'bg-green-100 text-green-800';
       case 2:
-        return 'bg-red-100 text-red-800'; // Failed
+        return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -67,7 +68,6 @@ const CampaignCard = ({ camp }) => {
         </div>
 
         <p className="text-gray-600 mb-4 line-clamp-2">{camp.description}</p>
-
         <div className="mb-4">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium text-gray-700">Progress</span>
@@ -115,7 +115,6 @@ const CampaignCard = ({ camp }) => {
             </div>
           </div>
         )}
-
         {error && <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
 
         <div className="flex flex-col gap-2 text-sm text-gray-500">
@@ -129,13 +128,53 @@ const CampaignCard = ({ camp }) => {
           </div>
         </div>
 
-        {camp.tiers.length === 0 && (
+        {camp.tiers.map((tier) => (
           <button
+            key={tier.name}
             onClick={() => handleFund()}
             disabled={loading || Number(camp.state) !== 0}
             className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">
             {loading ? 'Processing...' : 'Fund Campaign (0.01 ETH)'}
           </button>
+        ))}
+        {camp.tiers < 4 && (
+          <form
+            onSubmit={addNewTier}
+            className=" w-full">
+            <div>
+              <label
+                htmlFor="tierName"
+                className="block text-sm font-medium mb-2">
+                Tier Name
+              </label>
+              <input
+                id="tierName"
+                value={tierName}
+                onChange={(e) => setTierName(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter campaign duration in days"
+                min="1"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="tierVal"
+                className="block text-sm font-medium mb-2">
+                Tier Name
+              </label>
+              <input
+                id="tierVal"
+                value={tierVal}
+                onChange={(e) => setTierVal(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter campaign duration in days"
+                min="1"
+                disabled={loading}
+              />
+            </div>
+            <button>Add Tier</button>
+          </form>
         )}
       </div>
     </div>
