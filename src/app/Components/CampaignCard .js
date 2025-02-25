@@ -22,11 +22,10 @@ const CampaignCard = ({ camp }) => {
 
     addTier(camp.address, tierName, Number(tierVal));
   };
-  const handleFund = async (tierIndex = 0) => {
+  const handleFund = async (amount) => {
     try {
       setLoading(true);
       setError('');
-      const amount = camp.tiers.length > 0 ? camp.tiers[tierIndex].amount : '0.01';
       await fundCampaign(camp.address, tierIndex, amount);
     } catch (err) {
       setError(err.message || 'Failed to fund campaign');
@@ -101,14 +100,14 @@ const CampaignCard = ({ camp }) => {
                   key={index}
                   className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <div>
-                    <p className="font-medium">{tier.name}</p>
+                    <p className="font-medium">Tier {tier.name}</p>
                     <p className="text-sm text-gray-500">{tier.amount} ETH</p>
                   </div>
                   <button
-                    onClick={() => handleFund(index)}
+                    onClick={() => handleFund(tier.amount)}
                     disabled={loading || Number(camp.state) !== 0}
                     className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">
-                    Fund
+                    {loading ? 'Processing...' : ` Fund (${tier.amount} ETH)`}
                   </button>
                 </div>
               ))}
@@ -128,19 +127,10 @@ const CampaignCard = ({ camp }) => {
           </div>
         </div>
 
-        {camp.tiers.map((tier) => (
-          <button
-            key={tier.name}
-            onClick={() => handleFund()}
-            disabled={loading || Number(camp.state) !== 0}
-            className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">
-            {loading ? 'Processing...' : 'Fund Campaign (0.01 ETH)'}
-          </button>
-        ))}
-        {camp.tiers < 4 && (
+        {camp.tiers.length < 4 && (
           <form
             onSubmit={addNewTier}
-            className=" w-full">
+            className=" w-full grid grid-cols-3 gap-2">
             <div>
               <label
                 htmlFor="tierName"
@@ -161,10 +151,11 @@ const CampaignCard = ({ camp }) => {
               <label
                 htmlFor="tierVal"
                 className="block text-sm font-medium mb-2">
-                Tier Name
+                Tier Value
               </label>
               <input
                 id="tierVal"
+                type="number"
                 value={tierVal}
                 onChange={(e) => setTierVal(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -173,7 +164,7 @@ const CampaignCard = ({ camp }) => {
                 disabled={loading}
               />
             </div>
-            <button>Add Tier</button>
+            <button className="px-3 w-full h-fit mt-auto py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">Add Tier</button>
           </form>
         )}
       </div>
