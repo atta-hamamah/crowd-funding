@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fundCampaign, addTier } from '../utils/ethers';
 
-const CampaignCard = ({ camp }) => {
-  const [loading, setLoading] = useState(false);
+const CampaignCard = ({ camp, connectedAccount }) => {
+  const [loading, setLoading] = useState(null);
   const [tierName, setTierName] = useState('');
   const [tierVal, setTierVal] = useState('');
   const [error, setError] = useState('');
 
+  function isOwner() {
+    return connectedAccount.toLowerCase() === camp.owner.toLowerCase();
+  }
   const currentAmount = Number(camp.currentAmount);
   const goalAmount = Number(camp.goal);
   const progress = (currentAmount / goalAmount) * 100;
@@ -22,15 +25,15 @@ const CampaignCard = ({ camp }) => {
 
     addTier(camp.address, tierName, Number(tierVal));
   };
-  const handleFund = async (amount) => {
+  const handleFund = async (amount, tierIndex) => {
     try {
-      setLoading(true);
+      setLoading(tierIndex);
       setError('');
       await fundCampaign(camp.address, tierIndex, amount);
     } catch (err) {
       setError(err.message || 'Failed to fund campaign');
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   };
   const getStateColor = (state) => {
@@ -62,6 +65,7 @@ const CampaignCard = ({ camp }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
+          <p>sss{connectedAccount}</p>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">{camp.name}</h3>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>
         </div>
@@ -104,10 +108,10 @@ const CampaignCard = ({ camp }) => {
                     <p className="text-sm text-gray-500">{tier.amount} ETH</p>
                   </div>
                   <button
-                    onClick={() => handleFund(tier.amount)}
+                    onClick={() => handleFund(tier.amount, index)}
                     disabled={loading || Number(camp.state) !== 0}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">
-                    {loading ? 'Processing...' : ` Fund (${tier.amount} ETH)`}
+                    className={` ${loading === index ? 'bg-gray-300' : ''} w-36 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 `}>
+                    {loading === index ? 'Processing...' : ` Fund (${tier.amount} ETH)`}
                   </button>
                 </div>
               ))}
@@ -127,7 +131,7 @@ const CampaignCard = ({ camp }) => {
           </div>
         </div>
 
-        {camp.tiers.length < 4 && (
+        {isOwner() && camp.tiers.length < 4 && (
           <form
             onSubmit={addNewTier}
             className=" w-full grid grid-cols-3 gap-2">

@@ -10,11 +10,50 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [connectedAccount, setConnectedAccount] = useState('');
+
+  useEffect(() => {
+    if (window.ethereum) {
+      // Initial account check
+      checkConnectedAccount();
+
+      // Setup listeners for account changes
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0) {
+          setConnectedAccount(accounts[0]);
+          setIsWalletConnected(true);
+        } else {
+          setConnectedAccount('');
+          setIsWalletConnected(false);
+        }
+      });
+
+      // Cleanup listeners on component unmount
+      return () => {
+        window.ethereum.removeListener('accountsChanged', () => {});
+      };
+    }
+  }, []);
+
+  const checkConnectedAccount = async () => {
+    try {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          setConnectedAccount(accounts[0]);
+          setIsWalletConnected(true);
+        }
+      }
+    } catch (err) {
+      console.error('Error checking connected account:', err);
+    }
+  };
 
   const connectWallet = async () => {
     try {
-      if (window.ethereum !== 'undefined') {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setConnectedAccount(accounts[0]);
         setIsWalletConnected(true);
       } else {
         setError('Please install MetaMask to use this application');
@@ -24,7 +63,6 @@ export default function Home() {
       console.error(err);
     }
   };
-
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
@@ -80,6 +118,7 @@ export default function Home() {
         {campaigns.length > 0 ? (
           campaigns.map((camp) => (
             <CampaignCard
+              connectedAccount={connectedAccount}
               key={camp.address}
               camp={camp}
             />
