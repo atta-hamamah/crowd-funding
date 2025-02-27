@@ -150,3 +150,16 @@ export const addTier = async (campaignAddress, name, amount) => {
     throw error;
   }
 };
+
+export const removeTier = async (campaignAddress, index) => {
+  try {
+    const signer = await getSigner();
+    const campaign = getCrowdfundingContract(campaignAddress, signer);
+    const tx = await campaign.removeTier(index);
+    await tx.wait();
+    return tx;
+  } catch (error) {
+    console.error('Error removing tier:', error);
+    throw error;
+  }
+};

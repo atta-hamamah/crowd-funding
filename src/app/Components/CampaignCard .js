@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fundCampaign, addTier } from '../utils/ethers';
+import { fundCampaign, addTier, removeTier } from '../utils/ethers';
 
 const CampaignCard = ({ camp, connectedAccount }) => {
   const [loading, setLoading] = useState(null);
@@ -20,11 +20,34 @@ const CampaignCard = ({ camp, connectedAccount }) => {
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
-  const addNewTier = (e) => {
+  const addNewTier = async (e) => {
     e.preventDefault();
-
-    addTier(camp.address, tierName, Number(tierVal));
+    try {
+      setLoading('addTier');
+      setError('');
+      await addTier(camp.address, tierName, Number(tierVal));
+      setTierName('');
+      setTierVal('');
+    } catch (err) {
+      setError(err.message || 'Failed to add tier');
+    } finally {
+      setLoading(null);
+    }
   };
+  const deleteTier = async (index) => {
+    try {
+      setLoading('deleteTier' + index);
+      setError('');
+      await removeTier(camp.address, index);
+      setTierName('');
+      setTierVal('');
+    } catch (err) {
+      setError(err.message || 'Failed to remove tier');
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const handleFund = async (amount, tierIndex) => {
     try {
       setLoading(tierIndex);
@@ -65,7 +88,6 @@ const CampaignCard = ({ camp, connectedAccount }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <p>sss{connectedAccount}</p>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">{camp.name}</h3>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>
         </div>
@@ -107,12 +129,22 @@ const CampaignCard = ({ camp, connectedAccount }) => {
                     <p className="font-medium">Tier {tier.name}</p>
                     <p className="text-sm text-gray-500">{tier.amount} ETH</p>
                   </div>
-                  <button
-                    onClick={() => handleFund(tier.amount, index)}
-                    disabled={loading || Number(camp.state) !== 0}
-                    className={` ${loading === index ? 'bg-gray-300' : ''} w-36 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 `}>
-                    {loading === index ? 'Processing...' : ` Fund (${tier.amount} ETH)`}
-                  </button>
+                  <div className=" flex gap-2">
+                    {isOwner() && (
+                      <button
+                        onClick={() => deleteTier(index)}
+                        disabled={loading}
+                        className={` ${loading === 'deleteTier' + index ? 'bg-gray-300' : 'bg-red-600 hover:bg-red-700 '} w-36 px-3 py-1  text-white rounded `}>
+                        {loading === 'deleteTier' + index ? 'Processing...' : `Delete Tier`}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleFund(tier.amount, index)}
+                      disabled={loading || Number(camp.state) !== 0}
+                      className={` ${loading === index ? 'bg-gray-300' : 'bg-blue-600 hover:bg-blue-700'} w-36 px-3 py-1  text-white rounded `}>
+                      {loading === index ? 'Processing...' : ` Fund (${tier.amount} ETH)`}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -168,7 +200,7 @@ const CampaignCard = ({ camp, connectedAccount }) => {
                 disabled={loading}
               />
             </div>
-            <button className="px-3 w-full h-fit mt-auto py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">Add Tier</button>
+            <button className="px-3 w-full h-fit mt-auto py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">{loading === 'addTier' ? 'Processing...' : ' Add Tier'}</button>
           </form>
         )}
       </div>
