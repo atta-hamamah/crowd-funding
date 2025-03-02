@@ -87,7 +87,7 @@ export const getCampaignDetails = async (campaignAddress) => {
     // Get the contract's current balance
     const balance = await provider.getBalance(campaignAddress);
 
-    const [name, description, goal, deadline, owner, state, tiers] = await Promise.all([campaign.name(), campaign.description(), campaign.goal(), campaign.deadline(), campaign.owner(), campaign.getCampaignStatus(), campaign.getTiers()]);
+    const [name, description, goal, deadline, owner, state, tiers, paused] = await Promise.all([campaign.name(), campaign.description(), campaign.goal(), campaign.deadline(), campaign.owner(), campaign.getCampaignStatus(), campaign.getTiers(), campaign.paused()]);
 
     return {
       name,
@@ -97,6 +97,7 @@ export const getCampaignDetails = async (campaignAddress) => {
       deadline: new Date(Number(deadline) * 1000),
       owner,
       state,
+      paused,
       tiers: tiers.map((tier) => ({
         name: tier.name,
         amount: ethers.formatEther(tier.amount),
@@ -160,6 +161,18 @@ export const removeTier = async (campaignAddress, index) => {
     return tx;
   } catch (error) {
     console.error('Error removing tier:', error);
+    throw error;
+  }
+};
+export const togglePause = async (campaignAddress) => {
+  try {
+    const signer = await getSigner();
+    const campaign = getCrowdfundingContract(campaignAddress, signer);
+    const tx = await campaign.togglePause();
+    await tx.wait();
+    return tx;
+  } catch (error) {
+    console.error('Error toggling campaign pause state:', error);
     throw error;
   }
 };

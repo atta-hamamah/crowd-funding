@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fundCampaign, addTier, removeTier } from '../utils/ethers';
+import { fundCampaign, addTier, removeTier, togglePause } from '../utils/ethers';
 
 const CampaignCard = ({ camp, connectedAccount }) => {
   const [loading, setLoading] = useState(null);
@@ -59,6 +59,19 @@ const CampaignCard = ({ camp, connectedAccount }) => {
       setLoading(null);
     }
   };
+  const handleTogglePause = async () => {
+    try {
+      setLoading(`togglePause-${camp.address}`); // Unique identifier
+      setError('');
+      await togglePause(camp.address);
+      camp.paused = !camp.paused;
+    } catch (err) {
+      setError(err.message || 'Failed to toggle pause state');
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const getStateColor = (state) => {
     switch (state) {
       case 0:
@@ -89,7 +102,16 @@ const CampaignCard = ({ camp, connectedAccount }) => {
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">{camp.name}</h3>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>
+          <div>
+            <button
+              onClick={handleTogglePause}
+              disabled={loading === `togglePause-${camp.address}`}
+              className="px-3 py-1 bg-gray-700 text-white rounded">
+              {loading === `togglePause-${camp.address}` ? 'Processing...' : camp.paused ? 'Resume' : 'Pause'}
+            </button>
+
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>
+          </div>
         </div>
 
         <p className="text-gray-600 mb-4 line-clamp-2">{camp.description}</p>
