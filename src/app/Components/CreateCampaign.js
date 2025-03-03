@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createCampaign } from '../utils/ethers';
 
-export default function CreateCampaignForm({ isWalletConnected }) {
+export default function CreateCampaign({ isWalletConnected }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',

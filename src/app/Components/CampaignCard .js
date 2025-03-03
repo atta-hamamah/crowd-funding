@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fundCampaign, addTier, removeTier, togglePause } from '../utils/ethers';
 
-const CampaignCard = ({ camp, connectedAccount }) => {
+const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
   const [loading, setLoading] = useState(null);
   const [tierName, setTierName] = useState('');
   const [tierVal, setTierVal] = useState('');
@@ -28,12 +28,14 @@ const CampaignCard = ({ camp, connectedAccount }) => {
       await addTier(camp.address, tierName, Number(tierVal));
       setTierName('');
       setTierVal('');
+      await refreshCampaign(camp.address);
     } catch (err) {
       setError(err.message || 'Failed to add tier');
     } finally {
       setLoading(null);
     }
   };
+
   const deleteTier = async (index) => {
     try {
       setLoading('deleteTier' + index);
@@ -41,6 +43,7 @@ const CampaignCard = ({ camp, connectedAccount }) => {
       await removeTier(camp.address, index);
       setTierName('');
       setTierVal('');
+      await refreshCampaign(camp.address);
     } catch (err) {
       setError(err.message || 'Failed to remove tier');
     } finally {
@@ -53,25 +56,26 @@ const CampaignCard = ({ camp, connectedAccount }) => {
       setLoading(tierIndex);
       setError('');
       await fundCampaign(camp.address, tierIndex, amount);
+      await refreshCampaign(camp.address);
     } catch (err) {
       setError(err.message || 'Failed to fund campaign');
     } finally {
       setLoading(null);
     }
   };
+
   const handleTogglePause = async () => {
     try {
-      setLoading(`togglePause-${camp.address}`); // Unique identifier
+      setLoading(`togglePause-${camp.address}`);
       setError('');
       await togglePause(camp.address);
-      camp.paused = !camp.paused;
+      await refreshCampaign(camp.address);
     } catch (err) {
       setError(err.message || 'Failed to toggle pause state');
     } finally {
       setLoading(null);
     }
   };
-
   const getStateColor = (state) => {
     switch (state) {
       case 0:

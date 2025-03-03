@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getAllCampaigns, getCampaignDetails } from './utils/ethers';
-import CreateCampaignForm from './Components/CreateCamp';
+import CreateCampaign from './Components/CreateCampaign';
 import CampaignCard from './Components/CampaignCard ';
 
 export default function Home() {
@@ -14,10 +14,7 @@ export default function Home() {
 
   useEffect(() => {
     if (window.ethereum) {
-      // Initial account check
       checkConnectedAccount();
-
-      // Setup listeners for account changes
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length > 0) {
           setConnectedAccount(accounts[0]);
@@ -27,8 +24,6 @@ export default function Home() {
           setIsWalletConnected(false);
         }
       });
-
-      // Cleanup listeners on component unmount
       return () => {
         window.ethereum.removeListener('accountsChanged', () => {});
       };
@@ -91,6 +86,25 @@ export default function Home() {
       setLoading(false);
     }
   };
+  // Add this function in your Home component (paste-2.txt)
+  const refreshCampaign = async (campaignAddress) => {
+    try {
+      const updatedDetails = await getCampaignDetails(campaignAddress);
+      setCampaigns((prevCampaigns) =>
+        prevCampaigns.map((camp) =>
+          camp.address === campaignAddress
+            ? {
+                ...updatedDetails,
+                address: campaignAddress,
+                creationTime: camp.creationTime,
+              }
+            : camp
+        )
+      );
+    } catch (err) {
+      console.error('Failed to refresh campaign:', err);
+    }
+  };
 
   return (
     <div className=" py-4 px-8 bg-gray-100">
@@ -121,13 +135,14 @@ export default function Home() {
               connectedAccount={connectedAccount}
               key={camp.address}
               camp={camp}
+              refreshCampaign={refreshCampaign}
             />
           ))
         ) : (
           <p className=" col-span-2">no camps created</p>
         )}
       </section>
-      <CreateCampaignForm isWalletConnected={isWalletConnected} />
+      <CreateCampaign isWalletConnected={isWalletConnected} />
     </div>
   );
 }
