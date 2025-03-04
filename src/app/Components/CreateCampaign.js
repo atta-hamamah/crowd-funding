@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createCampaign } from '../utils/ethers';
 
-export default function CreateCampaign({ isWalletConnected }) {
+export default function CreateCampaign({ isWalletConnected, onCampaignCreated }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -48,6 +48,11 @@ export default function CreateCampaign({ isWalletConnected }) {
           goal: '',
           duration: '',
         });
+
+        // Call the onCampaignCreated callback to refresh the campaigns list
+        if (onCampaignCreated) {
+          onCampaignCreated();
+        }
       } catch (err) {
         setError(err.message || 'Failed to create campaign');
       } finally {
@@ -59,19 +64,17 @@ export default function CreateCampaign({ isWalletConnected }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold mb-6">Create New Campaign</h1>
 
       {error && (
-        <div
-          variant="destructive"
-          className="mb-4">
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
           <p>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 bg-green-50">
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
           <p>Campaign created successfully!</p>
         </div>
       )}

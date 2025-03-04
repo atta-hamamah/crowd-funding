@@ -15,7 +15,8 @@ const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
   const progress = (currentAmount / goalAmount) * 100;
   const formattedProgress = Math.min(progress, 100).toFixed(1);
 
-  const daysRemaining = Math.max(0, Math.ceil((new Date(camp.deadline) - new Date()) / (1000 * 60 * 60 * 24)));
+  const deadlineDate = camp.deadline instanceof Date ? camp.deadline : new Date(camp.deadline);
+  const daysRemaining = Math.max(0, Math.ceil((deadlineDate - new Date()) / (1000 * 60 * 60 * 24)));
 
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
