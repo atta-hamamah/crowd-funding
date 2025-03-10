@@ -84,7 +84,6 @@ export const getCampaignDetails = async (campaignAddress) => {
     const provider = getProvider();
     const campaign = getCrowdfundingContract(campaignAddress, provider);
 
-    // Get the contract's current balance
     const balance = await provider.getBalance(campaignAddress);
 
     const [name, description, goal, deadline, owner, state, tiers, paused] = await Promise.all([campaign.name(), campaign.description(), campaign.goal(), campaign.deadline(), campaign.owner(), campaign.getCampaignStatus(), campaign.getTiers(), campaign.paused()]);
@@ -93,7 +92,7 @@ export const getCampaignDetails = async (campaignAddress) => {
       name,
       description,
       goal: ethers.formatEther(goal),
-      currentAmount: ethers.formatEther(balance), // Add current balance
+      currentAmount: ethers.formatEther(balance),
       deadline: new Date(Number(deadline) * 1000),
       owner,
       state,

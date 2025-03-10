@@ -4,15 +4,30 @@ import { useState, useEffect } from 'react';
 import { getAllCampaigns, getCampaignDetails } from './utils/ethers';
 import CreateCampaign from './Components/CreateCampaign';
 import CampaignCard from './Components/CampaignCard ';
-
+import UserCampaigns from './Components/UserCampaigns';
 export default function Home() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [connectedAccount, setConnectedAccount] = useState('');
-  const [tab, setTab] = useState('');
+  const [tab, setTab] = useState('all');
 
+  const connectWallet = async () => {
+    try {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setConnectedAccount(accounts[0]);
+        setIsWalletConnected(true);
+        fetchCampaigns();
+      } else {
+        setError('Please install MetaMask to use this application');
+      }
+    } catch (err) {
+      setError('Failed to connect wallet');
+      console.error(err);
+    }
+  };
   useEffect(() => {
     if (window.ethereum) {
       checkConnectedAccount();
@@ -45,22 +60,6 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Error checking connected account:', err);
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setConnectedAccount(accounts[0]);
-        setIsWalletConnected(true);
-        fetchCampaigns();
-      } else {
-        setError('Please install MetaMask to use this application');
-      }
-    } catch (err) {
-      setError('Failed to connect wallet');
-      console.error(err);
     }
   };
 
@@ -118,43 +117,48 @@ export default function Home() {
   };
 
   return (
-    <div className="py-4 px-8 bg-gray-100">
-      <div className="bg-white rounded-lg shadow-lg p-8 mb-4">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Decentralized Crowdfunding</h1>
-        <p className="text-xl text-gray-600 mb-6">Support innovative projects and ideas through blockchain technology</p>
+    <main className="py-4 px-8 ">
+      <section className="bg-white sticky top-2 rounded-lg shadow-md p-8 mb-4  border ">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Decentralized Crowdfunding</h1>
+          </div>
+          {!isWalletConnected ? (
+            <button
+              onClick={connectWallet}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+              Connect Wallet
+            </button>
+          ) : (
+            <div className="text-green-600 font-semibold rounded-md  shadow shadow-green-400 p-2">
+              Wallet Connected: {connectedAccount.substring(0, 6)}...{connectedAccount.substring(connectedAccount.length - 4)}
+            </div>
+          )}
+        </div>
 
-        {!isWalletConnected ? (
-          <button
-            onClick={connectWallet}
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
-            Connect Wallet
-          </button>
-        ) : (
-          <div className="text-green-600 font-semibold">
-            Wallet Connected: {connectedAccount.substring(0, 6)}...{connectedAccount.substring(connectedAccount.length - 4)}
+        {isWalletConnected && (
+          <div className="flex justify-start gap-4 mt-4">
+            <button
+              className={` ${tab === 'all' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
+              onClick={() => setTab('all')}>
+              All campaigns
+            </button>
+            <button
+              className={` ${tab === 'user' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
+              onClick={() => setTab('user')}>
+              User Campaign
+            </button>
+            <button
+              className={` ${tab === 'create' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
+              onClick={() => setTab('create')}>
+              Create Campaign
+            </button>
           </div>
         )}
         {error && <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
-        <div>
-          <button
-            className={` ${tab === 'all' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
-            onClick={() => setTab('all')}>
-            All campaigns
-          </button>
-          <button
-            className={` ${tab === 'user' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
-            onClick={() => setTab('user')}>
-            User Campaign
-          </button>
-          <button
-            className={` ${tab === 'create' ? ' text-blue-600 border-blue-600' : ' text-gray-400'} border-b-2 `}
-            onClick={() => setTab('create')}>
-            Create Campaign
-          </button>
-        </div>
-      </div>
+      </section>
 
-      {isWalletConnected && (
+      {isWalletConnected ? (
         <div>
           {tab === 'all' && (
             <section>
@@ -189,9 +193,18 @@ export default function Home() {
               />
             </section>
           )}
-          {tab === 'user' && <section>user Campaign</section>}
+          {tab === 'user' && (
+            <UserCampaigns
+              connectedAccount={connectedAccount}
+              campaigns={campaigns}
+              loading={loading}
+              refreshCampaign={refreshCampaign}
+            />
+          )}
         </div>
+      ) : (
+        <p className="text-center mt-16 text-gray-600">Connect your wallet to view campaigns</p>
       )}
-    </div>
+    </main>
   );
 }

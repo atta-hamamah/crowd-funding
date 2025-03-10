@@ -48,8 +48,6 @@ export default function CreateCampaign({ isWalletConnected, onCampaignCreated })
           goal: '',
           duration: '',
         });
-
-        // Call the onCampaignCreated callback to refresh the campaigns list
         if (onCampaignCreated) {
           onCampaignCreated();
         }
@@ -64,7 +62,7 @@ export default function CreateCampaign({ isWalletConnected, onCampaignCreated })
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg border">
       <h1 className="text-3xl font-bold mb-6">Create New Campaign</h1>
 
       {error && (
@@ -106,55 +104,55 @@ export default function CreateCampaign({ isWalletConnected, onCampaignCreated })
             className="block text-sm font-medium mb-2">
             Description
           </label>
-          <textarea
+          <input
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows="4"
             placeholder="Describe your campaign"
             disabled={loading}
           />
         </div>
+        <div className=" col-span-2 flex items-center justify-center gap-4 w-full">
+          <div className=" w-full">
+            <label
+              htmlFor="goal"
+              className="block text-sm font-medium mb-2">
+              Funding Goal (ETH)
+            </label>
+            <input
+              type="number"
+              id="goal"
+              name="goal"
+              value={formData.goal}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter funding goal in ETH"
+              step="0.01"
+              min="0"
+              disabled={loading}
+            />
+          </div>
 
-        <div>
-          <label
-            htmlFor="goal"
-            className="block text-sm font-medium mb-2">
-            Funding Goal (ETH)
-          </label>
-          <input
-            type="number"
-            id="goal"
-            name="goal"
-            value={formData.goal}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter funding goal in ETH"
-            step="0.01"
-            min="0"
-            disabled={loading}
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="duration"
-            className="block text-sm font-medium mb-2">
-            Duration (Days)
-          </label>
-          <input
-            type="number"
-            id="duration"
-            name="duration"
-            value={formData.duration}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter campaign duration in days"
-            min="1"
-            disabled={loading}
-          />
+          <div className=" w-full">
+            <label
+              htmlFor="duration"
+              className="block text-sm font-medium mb-2">
+              Duration (Days)
+            </label>
+            <input
+              type="number"
+              id="duration"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter campaign duration in days"
+              min="1"
+              disabled={loading}
+            />
+          </div>
         </div>
 
         <button

@@ -104,19 +104,12 @@ const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
   };
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+      {error && <div className="p-2  text-red-700 text-sm">{error.split('(')[0]}</div>}
+
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">{camp.name}</h3>
-          <div>
-            <button
-              onClick={handleTogglePause}
-              disabled={loading === `togglePause-${camp.address}`}
-              className="px-3 py-1 bg-gray-700 text-white rounded">
-              {loading === `togglePause-${camp.address}` ? 'Processing...' : camp.paused ? 'Resume' : 'Pause'}
-            </button>
-
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>
-          </div>
+          {camp.paused ? <span className="  text-orange-600 bg-orange-50 rounded-full px-3 py-1 text-sm w-fit">Temporally paused</span> : <span className={`px-8 py-1 rounded-full text-sm font-medium ${getStateColor(Number(camp.state))}`}>{getStateText(Number(camp.state))}</span>}
         </div>
 
         <p className="text-gray-600 mb-4 line-clamp-2">{camp.description}</p>
@@ -133,7 +126,7 @@ const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <p className="text-sm text-gray-500">Raised</p>
             <p className="text-lg font-semibold text-gray-900">{currentAmount.toFixed(2)} ETH</p>
@@ -143,9 +136,19 @@ const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
             <p className="text-lg font-semibold text-gray-900">{goalAmount.toFixed(2)} ETH</p>
           </div>
         </div>
+        <div className="flex flex-col gap-2 text-sm text-gray-500">
+          <div className="flex justify-between items-center">
+            <span>Created: {new Date(camp.creationTime).toLocaleDateString()}</span>
+            <span>{daysRemaining} days left</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs">Owner: {formatAddress(camp.owner)}</span>
+            <span className="text-xs">ID: {formatAddress(camp.address)}</span>
+          </div>
+        </div>
 
         {camp.tiers.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-4 border-t  mt-2 pt-2">
             <p className="text-sm font-medium text-gray-700 mb-2">Funding Tiers</p>
             <div className="space-y-2">
               {camp.tiers.map((tier, index) => (
@@ -177,58 +180,58 @@ const CampaignCard = ({ camp, connectedAccount, refreshCampaign }) => {
             </div>
           </div>
         )}
-        {error && <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
-
-        <div className="flex flex-col gap-2 text-sm text-gray-500">
-          <div className="flex justify-between items-center">
-            <span>Created: {new Date(camp.creationTime).toLocaleDateString()}</span>
-            <span>{daysRemaining} days left</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs">Owner: {formatAddress(camp.owner)}</span>
-            <span className="text-xs">ID: {formatAddress(camp.address)}</span>
-          </div>
-        </div>
 
         {isOwner() && camp.tiers.length < 4 && (
-          <form
-            onSubmit={addNewTier}
-            className=" w-full grid grid-cols-3 gap-2">
-            <div>
-              <label
-                htmlFor="tierName"
-                className="block text-sm font-medium mb-2">
-                Tier Name
-              </label>
-              <input
-                id="tierName"
-                value={tierName}
-                onChange={(e) => setTierName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter campaign duration in days"
-                min="1"
-                disabled={loading}
-              />
+          <>
+            <form
+              onSubmit={addNewTier}
+              className=" w-full border-t p-2 mt-2 grid grid-cols-3 gap-2">
+              <div>
+                <label
+                  htmlFor="tierName"
+                  className="block text-sm font-medium mb-2">
+                  Tier Name
+                </label>
+                <input
+                  id="tierName"
+                  required
+                  value={tierName}
+                  onChange={(e) => setTierName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter campaign duration in days"
+                  min="1"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="tierVal"
+                  className="block text-sm font-medium mb-2">
+                  Tier Value
+                </label>
+                <input
+                  required
+                  id="tierVal"
+                  type="number"
+                  value={tierVal}
+                  onChange={(e) => setTierVal(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter campaign duration in days"
+                  min="1"
+                  disabled={loading}
+                />
+              </div>
+              <button className="px-3 w-full h-fit mt-auto py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">{loading === 'addTier' ? 'Processing...' : ' Add Tier'}</button>
+            </form>
+            <div className=" flex justify-end">
+              <button
+                onClick={handleTogglePause}
+                disabled={loading === `togglePause-${camp.address}`}
+                className="px-3 mt-4 mx-2 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded">
+                {loading === `togglePause-${camp.address}` ? 'Processing...' : camp.paused ? 'Resume Campaign' : 'Pause Campaign'}
+              </button>
             </div>
-            <div>
-              <label
-                htmlFor="tierVal"
-                className="block text-sm font-medium mb-2">
-                Tier Value
-              </label>
-              <input
-                id="tierVal"
-                type="number"
-                value={tierVal}
-                onChange={(e) => setTierVal(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter campaign duration in days"
-                min="1"
-                disabled={loading}
-              />
-            </div>
-            <button className="px-3 w-full h-fit mt-auto py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300">{loading === 'addTier' ? 'Processing...' : ' Add Tier'}</button>
-          </form>
+          </>
         )}
       </div>
     </div>
